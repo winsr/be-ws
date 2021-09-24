@@ -1,10 +1,8 @@
 const express = require("express")
 const app = express()
 const socket = require("socket.io")
-const color = require("colors")
 const cors = require("cors")
-
-const { joinUser, findUserById, userDisconnect } = require("./dummyuser")
+const { get_Current_User, user_Disconnect, join_User } = require("./dummyuser")
 
 app.use(express())
 app.use(cors())
@@ -12,58 +10,54 @@ app.use(cors())
 const port = 8000
 const server = app.listen(
   port,
-  console.log(`Server is running on the port no: ${port} `.green)
+  console.log(`Server is running on the port no: ${port}`)
 )
-
 const io = socket(server)
-io.on("connection", (socket) => {
-  // for a new user joining the room
-  socket.on("joinRoom", ({ username, roomname }) => {
-    // create new user
-    const user = {
-      id: socket.id,
-      room: roomname,
-      username,
-    }
-    joinUser(user)
 
-    // ! display welcome message to all users
+//initializing the socket io connection
+io.on("connection", (socket) => {
+  //for a new user joining the room
+  socket.on("joinRoom", ({ username, roomname }) => {
+    const user = join_User(socket.id, username, roomname)
+    socket.join(user.room)
+
+    //display a welcome message to the user who have joined a room
     socket.emit("message", {
       userId: user.id,
-      username: username,
-      text: `Welcome ${username}`,
+      username: user.username,
+      text: `Welcome ${user.username}`,
     })
 
-    // ! display message to tell all users in the room, that new user is joined
+    //displays a joined room message to all other room users except that particular user
     socket.broadcast.to(user.room).emit("message", {
       userId: user.id,
-      username: username,
-      text: `${username} has joined the chat`,
+      username: user.username,
+      text: `${user.username} has joined the chat`,
     })
   })
 
-  // user send message
+  //user sending message
   socket.on("chat", (text) => {
     //gets the room user and the message sent
-    const { room, id, username } = findUserById(socket.id)
+    const user = get_Current_User(socket.id)
 
-    io.to(room).emit("message", {
-      userId: id,
-      username: username,
+    io.to(user.room).emit("message", {
+      userId: user.id,
+      username: user.username,
       text: text,
     })
   })
 
-  // when the user exits the room
+  //when the user exits the room
   socket.on("disconnect", () => {
-    const user = userDisconnect(socket.id)
+    //the user is deleted from array of users and a left room message displayed
+    const user = user_Disconnect(socket.id)
 
     if (user) {
-      const { room, id, username } = user
-      io.to(room).emit("message", {
-        userId: id,
-        username: username,
-        text: `${username} has left the room`,
+      io.to(user.room).emit("message", {
+        userId: user.id,
+        username: user.username,
+        text: `${user.username} has left the room`,
       })
     }
   })

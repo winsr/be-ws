@@ -16,7 +16,6 @@
     "prettier": "^2.4.1"
   },
   "dependencies": {
-    "colors": "^1.4.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "socket.io": "^4.2.0"

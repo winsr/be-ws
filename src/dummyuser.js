@@ -1,23 +1,30 @@
 const users = []
 
-const joinUser = ({ id, username, room }) => {
-  const newUser = { id, username, room }
-  users.push(newUser)
-  console.log("new users => ", newUser)
+// joins the user to the specific chatroom
+function join_User(id, username, room) {
+  const user = { id, username, room }
 
-  return newUser
+  users.push(user)
+
+  return user
 }
 
-const findUserById = ({ id }) => users.find((user) => user.id === id)
+// Gets a particular user id to return the current user
+function get_Current_User(id) {
+  return users.find((p_user) => p_user.id === id)
+}
 
-function userDisconnect({ id }) {
-  const index = users.findIndex((user) => user.id === id)
+// called when the user leaves the chat and its user object deleted from array
+function user_Disconnect(id) {
+  const index = users.findIndex((p_user) => p_user.id === id)
 
-  if (index !== -1) user.splice(index, 1)[0]
+  if (index !== -1) {
+    return users.splice(index, 1)[0]
+  }
 }
 
 module.exports = {
-  joinUser,
-  findUserById,
-  userDisconnect,
+  join_User,
+  get_Current_User,
+  user_Disconnect,
 }
