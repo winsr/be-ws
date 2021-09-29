@@ -1,0 +1,39 @@
+# label workflow
+name: Linter
+
+# executes workflows that are defined with the on key
+on:
+  push:
+    branches:
+      - master
+      - staging
+      - development
+      - uat
+
+jobs:
+  run-linters:
+    name: run-linters
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        # node: [13.x, 14.x, 15.x]
+
+    # A step is a sequence of tasks
+    steps:
+      - name: Checkout git repository
+        uses: actions/checkout@v2
+
+      # - name: Setup node env
+      #   uses: actions/setup-node@v2.1.2
+      #   with:
+      #     node-version: ${{ matrix.node }}
+
+      - name: instal dependencies
+        run: npm install
+
+      - name: run linter
+        run: npm run lint
+
+      - name: run server
+        run: node src/server.js
